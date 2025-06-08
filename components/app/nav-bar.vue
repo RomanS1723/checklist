@@ -1,6 +1,6 @@
 <template>
   <v-navigation-drawer
-    v-if="true"
+    v-if="role === 'admin'"
     v-model="drawer"
     :rail="rail"
     permanent
@@ -87,6 +87,9 @@
 </template>
 
 <script setup lang="ts">
+const userStore = useUserStore();
+const role = computed(() => userStore.role);
+
 const drawer = ref(true);
 const rail = ref(false);
 const currentLang = ref("en");

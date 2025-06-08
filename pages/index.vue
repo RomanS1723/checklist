@@ -1,39 +1,102 @@
 <template>
   <div>
-    <div v-if="isMain" style="width: 100vw; height: 100vh">
+    <div v-if="activeTab === MAIN" style="width: 100vw; height: 100vh">
       <v-container>
         <v-card title="Тестирование" subtitle="Входное">
           <form>
-            <v-col>
-              <v-checkbox label="Документы проверены." />
-            </v-col>
-            <v-col>
-              <v-number-input
-                :reverse="false"
-                control-variant="split"
-                label="Остаток воды в бутылях"
-                :hide-input="false"
-                inset
-                variant="solo-filled"
+            <template v-if="initPreset">
+              <questions-answer
+                v-for="(el, idx) in initPreset"
+                :key="idx"
+                :entity="el"
               />
-            </v-col>
-            <v-col>
-              <v-checkbox label="Заканчиваются конфеты." />
-            </v-col>
-            <v-col>
-              <v-textarea label="Заметки, замечания" />
-            </v-col>
+            </template>
+            <v-divider />
+            <div class="text-end pa-4 mx-auto">
+              <v-btn
+                class="text-none"
+                color="success"
+                variant="flat"
+                width="110"
+                rounded
+                @click="sendInitQuestions"
+              >
+                Отправить
+              </v-btn>
+            </div>
           </form>
         </v-card>
       </v-container>
     </div>
-    <questions-sheet-start v-if="isStarted" @accept="console.log('accept')" />
-    <questions-sheet-complete v-if="isCompleted" @done="console.log('done')" />
+    <div v-if="activeTab === END" style="width: 100vw; height: 100vh">
+      <v-container>
+        <v-card title="Тестирование" subtitle="Завершающее">
+          <form>
+            <template v-if="endPreset">
+              <questions-answer
+                v-for="(el, idx) in endPreset"
+                :key="idx"
+                :entity="el"
+              />
+            </template>
+            <v-divider />
+            <div class="text-end pa-4 mx-auto">
+              <v-btn
+                class="text-none"
+                color="success"
+                variant="flat"
+                width="110"
+                rounded
+                @click="sendEndQuestions"
+              >
+                Отправить
+              </v-btn>
+            </div>
+          </form>
+        </v-card>
+      </v-container>
+    </div>
+    <questions-sheet-start v-if="activeTab === START" @accept="start" />
+    <questions-sheet-complete
+      v-if="activeTab === COMPLETED"
+      @done="activeTab = START"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-const isStarted = ref(false);
-const isMain = ref(false);
-const isCompleted = ref(false);
+definePageMeta({
+  layout: "default",
+});
+const START = "start";
+const MAIN = "main";
+const END = "end";
+const COMPLETED = "completed";
+const activeTab = ref(START);
+
+const presetStore = useAnswerPresetStore();
+const questionStore = useQuestionStore();
+const initPreset = computed(() => questionStore.initQuestions);
+const endPreset = computed(() => questionStore.endQuestions);
+
+onMounted(async () => {
+  setPageLayout("default");
+  await presetStore.getAnswerPreset();
+  questionStore.generateInitQuestions();
+  questionStore.generateEndQuestions();
+});
+
+const start = () => {
+  activeTab.value = MAIN;
+};
+
+const sendInitQuestions = async () => {
+  await questionStore.sendInit();
+  activeTab.value = END;
+};
+
+const sendEndQuestions = async () => {
+  await questionStore.sendEnd();
+  window.location.reload();
+};
 </script>

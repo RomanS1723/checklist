@@ -52,7 +52,7 @@
                   > -->
               </v-col>
               <v-col>
-                <v-btn rounded="pill" color="success" @click="logIn"
+                <v-btn rounded="pill" color="success" @click="signIn"
                   >Log in</v-btn
                 >
               </v-col>
@@ -129,8 +129,10 @@
 
 <script setup lang="ts">
 definePageMeta({
-  layout: "",
+  layout: "empty",
 });
+
+const { logIn, logOut } = useUserStore();
 
 const START = "start";
 const LOGIN = "login";
@@ -168,9 +170,9 @@ const passwordRules = ref([
     return "Обязательно для заполнения.";
   },
   (value: string) => {
-    if (value.length > 6) return true;
+    if (value.length >= 5) return true;
 
-    return "Minimum of 6 characters.";
+    return "Minimum of 5 characters.";
   },
 ]);
 const registerData = ref({
@@ -182,6 +184,11 @@ const registerData = ref({
 const logInData = ref({
   email: "",
   password: "",
+});
+
+onMounted(() => {
+  setPageLayout("empty");
+  logOut();
 });
 
 const goBack = () => {
@@ -220,13 +227,22 @@ const register = async () => {
   // register logic
 };
 
-const logIn = async () => {
+const signIn = async () => {
   try {
     if (Object.values(logInData.value).filter((e) => e === "").length) return;
     // log in logic
-    router.push("/");
+    const data = await logIn(logInData.value.email, logInData.value.password);
+    if (data.role === "user") {
+      router.push("/");
+      return;
+    }
+    if (data.role === "admin") {
+      router.push("/admin");
+      return;
+    }
+    // router.push("/");
     //
-    dialog.value = true;
+    // dialog.value = true;
   } catch {
     dialog.value = true;
   }

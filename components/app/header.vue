@@ -16,7 +16,7 @@
       slim
       @click="
         () => {
-          //TODO: exit
+          router.push('/start');
         }
       "
     />
@@ -26,6 +26,7 @@
 <script setup lang="ts">
 import { useTheme } from "vuetify";
 
+const router = useRouter();
 const vuetifyTheme = useTheme();
 const theme = ref("dark");
 
