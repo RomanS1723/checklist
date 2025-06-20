@@ -2,8 +2,8 @@
   <v-dialog v-model="dialog" max-width="600">
     <template #activator="{ props: activatorProps }">
       <v-btn
-        color="red-lighten-2"
-        variant="outlined"
+        rounded="pill"
+        color="error"
         :loading="loading"
         v-bind="activatorProps"
       >
@@ -13,7 +13,7 @@
     <v-card
       prepend-icon="mdi-minus-circle-multiple"
       text="Вы не сможете восстановить данные после удаления, хотите продолжить?"
-      title="Удалить вопрос"
+      title="Удалить пользователя"
     >
       <template #actions>
         <v-spacer />
@@ -27,18 +27,18 @@
 </template>
 
 <script setup lang="ts">
+const userStore = useUserStore();
+
 const props = defineProps<{
   id: number;
 }>();
-
-const presetStore = useAnswerPresetStore();
 
 const dialog = ref(false);
 const loading = ref(false);
 
 const approve = async () => {
   // remove logic
-  const pr = await presetStore.adminRemove(props.id);
+  const pr = await userStore.adminRemove(props.id);
   console.log(pr);
   dialog.value = false;
 };

@@ -1,7 +1,7 @@
 <template>
   <v-text-field
     v-bind="$attrs"
-    label="Пароль"
+    :label="label"
     required
     variant="outlined"
     :type="showPassword ? 'text' : 'password'"
@@ -12,6 +12,12 @@
 </template>
 
 <script setup lang="ts">
+defineProps({
+  label: {
+    type: String,
+    default: "Пароль",
+  },
+});
 const showPassword = ref(false);
 const passwordRules = ref([
   (value: string) => {
@@ -20,9 +26,9 @@ const passwordRules = ref([
     return "Обязательно для заполнения.";
   },
   (value: string) => {
-    if (value.length > 6) return true;
+    if (value.length >= 6) return true;
 
-    return "Minimum of 6 characters.";
+    return "Минииуи 6 символов.";
   },
 ]);
 </script>

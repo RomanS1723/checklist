@@ -1,4 +1,5 @@
 import { onEnd, onStart } from "~/api/post";
+import { getAnswers as getAnswersAPI } from "~/api";
 
 export const useQuestionStore = defineStore("question-store", () => {
   const localGetItem = (key: string): string | null => {
@@ -13,6 +14,7 @@ export const useQuestionStore = defineStore("question-store", () => {
 
   const initQuestions = ref([]);
   const endQuestions = ref([]);
+  const answers = ref([]);
 
   const presetStore = useAnswerPresetStore();
   const userStore = useUserStore();
@@ -91,6 +93,10 @@ export const useQuestionStore = defineStore("question-store", () => {
     clearPostId();
   };
 
+  const getAnswers = async () => {
+    answers.value = (await getAnswersAPI()) || [];
+  };
+
   return {
     postId,
     initQuestions,
@@ -102,5 +108,7 @@ export const useQuestionStore = defineStore("question-store", () => {
     updateEndQuestion,
     sendInit,
     sendEnd,
+    getAnswers,
+    answers,
   };
 });

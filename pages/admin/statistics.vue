@@ -12,7 +12,7 @@
           >
             <v-sparkline
               :labels="labels"
-              :model-value="value"
+              :model-value="graph"
               color="white"
               line-width="2"
               padding="16"
@@ -33,7 +33,7 @@
         </v-card>
       </v-col>
       <v-col cols="12" justify="center">
-        <v-card title="Nutrition" flat>
+        <v-card title="Ответы" flat>
           <template #text>
             <v-text-field
               v-model="search"
@@ -45,11 +45,7 @@
             />
           </template>
 
-          <v-data-table
-            :headers="headers"
-            :items="questions"
-            :search="search"
-          />
+          <v-data-table :headers="headers" :items="answers" :search="search" />
         </v-card>
       </v-col>
     </v-row>
@@ -57,38 +53,44 @@
 </template>
 
 <script setup>
+const questionsStore = useQuestionStore();
+
+onMounted(async () => await questionsStore.getAnswers());
+const typesTranscription = ref({
+  correct: "вопрос/ответ",
+  description: "развернутый ответ",
+  count: "числовой ответ",
+});
+const onBeforeStartTranscription = ref({
+  true: "В начале",
+  false: "В конце",
+});
+const answers = computed(() =>
+  questionsStore.answers.map((el) => ({
+    type: typesTranscription.value[el?.type],
+    question: el?.fieldDescription,
+    answer:
+      el?.correct?.toString() === "true"
+        ? "верно"
+        : el?.correct?.toString() === "false"
+        ? "не верно"
+        : el?.description || el?.count,
+    userName: el?.Post?.User?.login,
+    date: el?.createdAt.toString().split("T")[0],
+  }))
+);
+
 const labels = ref(["пн", "вт", "ср", "чт", "пт", "сб", "вс"]);
-const value = ref([0, 5, 10, 3, 10, 6, 5]);
+const graph = computed(() =>
+  answers.value.map((el) => new Date(el.date).getDay())
+);
 const search = ref("");
 const headers = [
-  {
-    align: "start",
-    key: "type",
-    sortable: false,
-    title: "Ответы",
-  },
   { key: "type", title: "Тип" },
   { key: "question", title: "Вопрос" },
   { key: "answer", title: "Ответ" },
   { key: "userName", title: "Логин пользователя" },
   { key: "date", title: "Дата ответа" },
-];
-
-const questions = [
-  {
-    type: "Числовой",
-    question: "Количество бутылок с питьевой водой.",
-    answer: 4,
-    userName: "user0",
-    date: "8:15 27/05/2025",
-  },
-  {
-    type: "Вопрос/ответ",
-    question: "Документы проверены.",
-    answer: true,
-    userName: "user0",
-    date: "8:15 27/05/2025",
-  },
 ];
 </script>
 
